@@ -1,0 +1,6 @@
+[submodule "vender/etcpak"]
+	path = vender/etcpak
+	url = https://github.com/gusrlLee/etcpak.git
+[submodule "vender/astc-encoder"]
+	path = vender/astc-encoder
+	url = https://github.com/ARM-software/astc-encoder.git
