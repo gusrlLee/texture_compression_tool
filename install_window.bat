@@ -46,14 +46,18 @@ cd ../../
 if not exist "encoders\etcpak" mkdir "encoders\etcpak"
 xcopy /E /Y /I "vender\etcpak\build\Release" "encoders\etcpak"
 
-if not exist "encoders\astcenc" mkdir "encoders\astcenc"
 
 cd vender/astc-encoder
-cmake . -B build -DCMAKE_BUILD_TYPE=Release
+cmake . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS="/wd4819" -DCMAKE_CXX_FLAGS="/wd4819"
 echo [INFO] Configuration completed successfully!
+
 echo [INFO] Start build of astcenc...
 cmake --build build --config Release
 echo [INFO] Build of astcenc completed successfully!
+
+cd ../../
+if not exist "encoders\astcenc" mkdir "encoders\astcenc"
+xcopy /E /Y /I "vender\astc-encoder\build\Source\Release" "encoders\astcenc"
 
 endlocal
 pause
