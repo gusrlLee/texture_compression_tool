@@ -8,7 +8,7 @@ import subprocess
 import multiprocessing as mp
 from multiprocessing import Process, Value, Lock
 
-etcpak_exefile_path = os.path.join(os.getcwd(), "encoders", "etcpak", "etcpak")
+etcpak_exefile_path = os.path.join(os.getcwd(), "encoders", "etcpak", "etcpak.exe")
 astc_exefile_path = os.path.join(os.getcwd(), "encoders", "astcenc", "astcenc-native")
 
 # Process Function
@@ -28,9 +28,9 @@ def works(args, images, image_index, lock):
         rel_dir = os.path.dirname(rel_path)
         
         if args.codec == "astc":
-            output_path = os.path.join(args.output_path, name + ".astc")
+            output_path = os.path.join(args.output_path, "astc", rel_dir, name + ".astc")
             command = [
-                "astcenc", 
+                astc_exefile_path, 
                 "-cl", input_path, output_path, args.block_size,
                 f"-{args.quality}", 
                 "-j", str(args.nThreads)
@@ -50,14 +50,14 @@ def works(args, images, image_index, lock):
             ]
             if args.mipmaps:
                 command.append("--mipmaps")
-                
-        # # 명령어 실행 (subprocess 활용)
+
+        # 명령어 실행 (subprocess 활용)
         # print(f"[Process-{os.getpid()}] Encoding: {filename} -> {os.path.basename(output_path)}")
-        # try:
-        #     # shell=False로 안전하게 실행, 출력이 겹치지 않게 stdout 숨김 처리 (필요시 제거)
-        #     subprocess.run(command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        # except Exception as e:
-        #     print(f"Error encoding {filename}: {e}")
+        try:
+            # shell=False로 안전하게 실행, 출력이 겹치지 않게 stdout 숨김 처리 (필요시 제거)
+            subprocess.run(command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except Exception as e:
+            print(f"Error encoding {filename}: {e}")
 
 if __name__ == "__main__":
 # Parser 
@@ -154,5 +154,6 @@ if __name__ == "__main__":
         process.join()
 
     program_end_time = time.perf_counter()
+    
     print(f"\n[Done] All tasks completed.")
     print(f"Total Elapsed Time: {(program_end_time - program_start_time) * 1000:.2f} ms")
