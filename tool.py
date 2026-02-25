@@ -113,7 +113,7 @@ def works(args, images, image_index, lock):
                 output_path, 
             ]
 
-            if args.etc2_hq:
+            if args.etc2_hq and args.codec == "etc2":
                 command.append("--etc2_hq")
 
             # if args.mipmaps:
