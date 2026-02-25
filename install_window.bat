@@ -48,7 +48,7 @@ xcopy /E /Y /I "vender\etcpak\build\Release" "encoders\etcpak"
 
 
 cd vender/astc-encoder
-cmake . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS="/wd4819" -DCMAKE_CXX_FLAGS="/wd4819"
+cmake . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS="/wd4819" -DCMAKE_CXX_FLAGS="/wd4819" -DASTCENC_ISA_AVX2=ON
 echo [INFO] Configuration completed successfully!
 
 echo [INFO] Start build of astcenc...
