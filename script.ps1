@@ -32,7 +32,7 @@ foreach ($pt in $pt_combinations) {
     python tool.py --codec etc1 --nProcesses $p --nThreads $t --data_path dataset --output_path $out_folder
 }
 
-$etc2_codecs = @("etc2_rgb", "etc2_rgba")
+$etc2_codecs = @("etc2")
 foreach ($codec in $etc2_codecs) {
     
     foreach ($pt in $pt_combinations) {
@@ -56,8 +56,8 @@ foreach ($codec in $etc2_codecs) {
 
 Write-Host "`n[TEST] ASTC format starting..." -ForegroundColor Green
 
-# $astc_qualities = @("fastest", "fast", "medium", "thorough", "verythorough", "exhaustive")
-$astc_qualities = @("fastest", "fast", "medium")
+$astc_qualities = @("fastest", "fast", "medium", "thorough", "verythorough", "exhaustive")
+# $astc_qualities = @("fastest", "fast", "medium")
 $astc_blocks = @("4x4", "5x4", "5x5", "6x5", "6x6", "8x5", "8x6", "3x3x3", "4x3x3", "4x4x3", "4x4x4", "5x4x4")
 
 foreach ($q in $astc_qualities) {

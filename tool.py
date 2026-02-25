@@ -2,13 +2,13 @@ import sys
 import os 
 import argparse
 import time 
-import platform
 
 import subprocess
 import multiprocessing as mp
 from multiprocessing import Process, Value, Lock
 
-# 
+from PIL import Image
+
 etcpak_exefile_path = os.path.join(os.getcwd(), "encoders", "etcpak", "etcpak.exe")
 astc_exefile_path = os.path.join(os.getcwd(), "encoders", "astcenc", "astcenc-avx2.exe")
 
@@ -23,7 +23,7 @@ def parse_arguments():
     common_group.add_argument("-d", "--data_path", type=str, required=True, help="Input data image path")
     common_group.add_argument("-o", "--output_path", type=str, required=True, help="Compressed output save path")
     common_group.add_argument("-c", "--codec", type=str, required=True,
-                              choices=["astc", "bc1", "bc3", "bc4", "bc5", "bc7", "etc1", "etc2_rgb", "etc2_rgba"],
+                              choices=["astc", "bc1", "bc3", "bc4", "bc5", "bc7", "etc1", "etc2"],
                               help="Select codec format")
 
     # 2. Performance & Concurrency Options 
@@ -52,7 +52,7 @@ def parse_arguments():
     args = parser.parse_args()
 
     # Check if --etc2_hq is used with a non-ETC2 codec
-    if args.codec not in ["etc2_rgb", "etc2_rgba"] and args.etc2_hq:
+    if args.codec not in ["etc2"] and args.etc2_hq:
         parser.error(f"The --etc2_hq option is only valid for 'etc2_rgb' or 'etc2_rgba' codecs. (Current codec: {args.codec})")
 
     # Check if ASTC-specific options are explicitly used with a non-ASTC codec
@@ -87,20 +87,28 @@ def works(args, images, image_index, lock):
             output_path = os.path.join(args.output_path, "astc", rel_dir, name + ".astc")
             command = [
                 astc_exefile_path, 
-                "-cl", input_path, output_path, args.astc_block_size, 
+                "-cl", input_path, 
+                output_path, 
+                args.astc_block_size, 
                 f"-{args.astc_quality}",  
                 "-j", str(args.nThreads)
             ]
         else:
-            # 3. 폴더 구조를 완벽하게 유지한 최종 출력 경로 조립!
+            # Checking alpha image
+            img = Image.open(input_path)
+            codec = args.codec 
+
+            if args.codec == "etc2" and len(img.getbands()) == 4:
+                codec = "etc2_rgba"
+            else:
+                codec = "etc2_rgb"
+
             output_path = os.path.join(args.output_path, "ktx", rel_dir, name + ".ktx")
-            
-            # 4. subprocess에 맞게 커맨드라인 분리 (매우 중요)
             command = [
                 etcpak_exefile_path, 
                 "-M", 
-                "-c", args.codec,          # 띄어쓰기 대신 리스트 요소로 분리!
-                "-t", str(args.nThreads),  # args.nThreads는 숫자이므로 문자열(str)로 변환
+                "-c", codec,
+                "-t", str(args.nThreads),
                 input_path, 
                 output_path, 
             ]
@@ -111,10 +119,7 @@ def works(args, images, image_index, lock):
             # if args.mipmaps:
             #     command.append("--mipmaps")
 
-        # 명령어 실행 (subprocess 활용)
-        # print(f"[Process-{os.getpid()}] Encoding: {filename} -> {os.path.basename(output_path)}")
         try:
-            # shell=False로 안전하게 실행, 출력이 겹치지 않게 stdout 숨김 처리 (필요시 제거)
             subprocess.run(command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         except Exception as e:
             print(f"Error encoding {filename}: {e}")
@@ -188,5 +193,4 @@ if __name__ == "__main__":
         process.join()
 
     program_end_time = time.perf_counter()
-    
     print(f"{args.codec}, {(program_end_time - program_start_time) * 1000:.4f}")
