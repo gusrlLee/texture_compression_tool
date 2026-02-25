@@ -95,13 +95,13 @@ def works(args, images, image_index, lock):
             ]
         else:
             # Checking alpha image
-            img = Image.open(input_path)
             codec = args.codec 
-
-            if args.codec == "etc2" and len(img.getbands()) == 4:
-                codec = "etc2_rgba"
-            else:
-                codec = "etc2_rgb"
+            if args.codec == "etc2":
+                with Image.open(input_path) as img:
+                    if len(img.getbands()) == 4:
+                        codec = "etc2_rgba"
+                    else:
+                        codec = "etc2_rgb"
 
             output_path = os.path.join(args.output_path, "ktx", rel_dir, name + ".ktx")
             command = [
