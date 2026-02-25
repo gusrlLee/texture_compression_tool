@@ -18,6 +18,10 @@ foreach ($codec in $bc_codecs) {
         
         Write-Host "Running $codec | Process: $p | Thread: $t" -ForegroundColor DarkGray
         python tool.py --codec $codec --nProcesses $p --nThreads $t --data_path dataset --output_path $out_folder
+        if (Test-Path $out_folder) 
+        {
+            Remove-Item -Path $out_folder -Recurse -Force
+        }   
     }
 }
 
@@ -30,6 +34,10 @@ foreach ($pt in $pt_combinations) {
     
     Write-Host "Running etc1 | Process: $p | Thread: $t" -ForegroundColor DarkGray
     python tool.py --codec etc1 --nProcesses $p --nThreads $t --data_path dataset --output_path $out_folder
+    if (Test-Path $out_folder) 
+    {
+        Remove-Item -Path $out_folder -Recurse -Force
+    }
 }
 
 $etc2_codecs = @("etc2")
@@ -42,6 +50,10 @@ foreach ($codec in $etc2_codecs) {
         
         Write-Host "Running $codec (Standard) | Process: $p | Thread: $t" -ForegroundColor DarkGray
         python tool.py --codec $codec --nProcesses $p --nThreads $t --data_path dataset --output_path $out_folder
+        if (Test-Path $out_folder) 
+        {
+            Remove-Item -Path $out_folder -Recurse -Force
+        }
     }
     
     foreach ($pt in $pt_combinations) {
@@ -51,6 +63,10 @@ foreach ($codec in $etc2_codecs) {
         
         Write-Host "Running $codec (HQ) | Process: $p | Thread: $t" -ForegroundColor Yellow
         python tool.py --codec $codec --etc2_hq --nProcesses $p --nThreads $t --data_path dataset --output_path $out_folder
+        if (Test-Path $out_folder) 
+        {
+            Remove-Item -Path $out_folder -Recurse -Force
+        }
     }
 }
 
@@ -69,6 +85,11 @@ foreach ($q in $astc_qualities) {
             
             Write-Host "Running ASTC | Quality: $q | Block: $b | Process: $p | Thread: $t" -ForegroundColor DarkGray
             python tool.py --codec astc --astc_quality $q --astc_block_size $b --nProcesses $p --nThreads $t --data_path dataset --output_path $out_folder
+
+            if (Test-Path $out_folder) 
+            {
+                Remove-Item -Path $out_folder -Recurse -Force
+            }
         }
     }
 }
