@@ -10,8 +10,8 @@ $pt_combinations = @(
 $bc_codecs = @("bc1", "bc3", "bc7")
 Write-Host "`n[TEST] BC formats starting..." -ForegroundColor Green
 
-foreach ($codec in $bc_codecs) {
-    foreach ($pt in $pt_combinations) {
+foreach ($pt in $pt_combinations) {
+    foreach ($codec in $bc_codecs) {
         $p = $pt.P
         $t = $pt.T
         $out_folder = "${codec}_output_P${p}_T${t}"
@@ -41,9 +41,8 @@ foreach ($pt in $pt_combinations) {
 }
 
 $etc2_codecs = @("etc2")
-foreach ($codec in $etc2_codecs) {
-    
-    foreach ($pt in $pt_combinations) {
+foreach ($pt in $pt_combinations) {
+    foreach ($codec in $etc2_codecs) {
         $p = $pt.P
         $t = $pt.T
         $out_folder = "${codec}_output_P${p}_T${t}"
@@ -56,7 +55,7 @@ foreach ($codec in $etc2_codecs) {
         }
     }
     
-    foreach ($pt in $pt_combinations) {
+    foreach ($codec in $etc2_codecs) {
         $p = $pt.P
         $t = $pt.T
         $out_folder = "${codec}_hq_output_P${p}_T${t}" # hq 폴더명 분리
@@ -72,13 +71,16 @@ foreach ($codec in $etc2_codecs) {
 
 Write-Host "`n[TEST] ASTC format starting..." -ForegroundColor Green
 
-$astc_qualities = @("fastest", "fast", "medium", "thorough", "verythorough", "exhaustive")
-# $astc_qualities = @("fastest", "fast", "medium")
-$astc_blocks = @("4x4", "5x4", "5x5", "6x5", "6x6", "8x5", "8x6", "3x3x3", "4x3x3", "4x4x3", "4x4x4", "5x4x4")
+$astc_qualities = @("fastest", "medium", "thorough")
 
-foreach ($q in $astc_qualities) {
-    foreach ($b in $astc_blocks) {
-        foreach ($pt in $pt_combinations) {
+# $astc_qualities = @("fastest", "fast", "medium")
+# $astc_blocks = @("4x4", "5x4", "5x5", "6x5", "6x6", "8x5", "8x6", "3x3x3", "4x3x3", "4x4x3", "4x4x4", "5x4x4")
+
+$astc_blocks = @("4x4", "6x6")
+
+foreach ($pt in $pt_combinations) {
+    foreach ($q in $astc_qualities) {
+        foreach ($b in $astc_blocks) {
             $p = $pt.P
             $t = $pt.T
             $out_folder = "astc_output_Q$($q)_B$($b)_P$($p)_T$($t)"

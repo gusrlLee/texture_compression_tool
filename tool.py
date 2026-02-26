@@ -12,6 +12,13 @@ from PIL import Image
 etcpak_exefile_path = os.path.join(os.getcwd(), "encoders", "etcpak", "etcpak.exe")
 astc_exefile_path = os.path.join(os.getcwd(), "encoders", "astcenc", "astcenc-avx2.exe")
 
+"""
+추가 사항 
+1. astc target psnr SW impact paper adding -> 실험 필요
+2. cH argu 가능하게 추가 대신 실험은 X
+3. astc fastest, medium, thorough, quality 만 체크
+"""
+
 def parse_arguments():
     parser = argparse.ArgumentParser(
         description="Texture Compression Batch Tool: Wrapper for Texture Compression",
@@ -153,6 +160,9 @@ if __name__ == "__main__":
             if file.lower().endswith(img_extensions):
                 image_paths.append(os.path.join(root, file))
 
+    if (len(image_paths) == 0):
+        raise ValueError("Please check your data path!")
+    
     # ---------------------------------------------------------
     # WORK FLOW 3: Image Sorting by File Size
     # ---------------------------------------------------------
@@ -193,4 +203,11 @@ if __name__ == "__main__":
         process.join()
 
     program_end_time = time.perf_counter()
-    print(f"{args.codec}, {(program_end_time - program_start_time) * 1000:.4f}")
+    if args.codec == "etc1":
+        print(f"{args.codec}, {args.astc_block_size}, {args.astc_quality} ,{args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
+    elif args.codec == "etc2":
+        print(f"{args.codec}, {args.astc_block_size}, {args.astc_quality} ,{args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
+    elif args.codec == "astc":
+        print(f"{args.codec}, {args.astc_block_size}, {args.astc_quality} ,{args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
+    else: # bc
+        print(f"{args.codec}, {args.astc_block_size}, {args.astc_quality} ,{args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
