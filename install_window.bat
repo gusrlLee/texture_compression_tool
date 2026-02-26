@@ -39,7 +39,7 @@ cmake . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="%VCPKG_TOOLC
 echo [INFO] Configuration completed successfully!
 
 echo [INFO] Start build of etcpak 2.0...
-cmake --build build --config Release
+cmake --build build --config Release --parallel
 echo [INFO] Build of etcpak 2.0 completed successfully!
 
 cd ../../
@@ -52,12 +52,23 @@ cmake . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS="/wd4819" -DCMAKE_CX
 echo [INFO] Configuration completed successfully!
 
 echo [INFO] Start build of astcenc...
-cmake --build build --config Release
+cmake --build build --config Release --parallel
 echo [INFO] Build of astcenc completed successfully!
 
 cd ../../
 if not exist "encoders\astcenc" mkdir "encoders\astcenc"
 xcopy /E /Y /I "vender\astc-encoder\build\Source\Release" "encoders\astcenc"
+
+cd vender/astc-encoder-psnr
+cmake . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS="/wd4819" -DCMAKE_CXX_FLAGS="/wd4819" -DASTCENC_ISA_AVX2=ON
+echo [INFO] Configuration completed successfully!
+echo [INFO] Start build of astcenc...
+cmake --build build --config Release --parallel
+echo [INFO] Build of astcenc completed successfully!
+
+cd ../../
+if not exist "encoders\astcenc-psnr" mkdir "encoders\astcenc-psnr"
+xcopy /E /Y /I "vender\astc-encoder-psnr\build\Source\Release" "encoders\astcenc-psnr"
 
 endlocal
 pause

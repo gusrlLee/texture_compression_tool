@@ -72,11 +72,11 @@ foreach ($pt in $pt_combinations) {
 Write-Host "`n[TEST] ASTC format starting..." -ForegroundColor Green
 
 $astc_qualities = @("fastest", "medium", "thorough")
+$astc_blocks = @("4x4", "6x6")
 
 # $astc_qualities = @("fastest", "fast", "medium")
 # $astc_blocks = @("4x4", "5x4", "5x5", "6x5", "6x6", "8x5", "8x6", "3x3x3", "4x3x3", "4x4x3", "4x4x4", "5x4x4")
 
-$astc_blocks = @("4x4", "6x6")
 
 foreach ($pt in $pt_combinations) {
     foreach ($q in $astc_qualities) {
@@ -86,11 +86,31 @@ foreach ($pt in $pt_combinations) {
             $out_folder = "astc_output_Q$($q)_B$($b)_P$($p)_T$($t)"
             
             Write-Host "Running ASTC | Quality: $q | Block: $b | Process: $p | Thread: $t" -ForegroundColor DarkGray
-            python tool.py --codec astc --astc_quality $q --astc_block_size $b --nProcesses $p --nThreads $t --data_path dataset --output_path $out_folder
+            python tool.py --astc_mode cl --codec astc --astc_quality $q --astc_block_size $b --nProcesses $p --nThreads $t --data_path dataset --output_path $out_folder
 
             if (Test-Path $out_folder) 
             {
                 Remove-Item -Path $out_folder -Recurse -Force
+            }
+        }
+    }
+}
+
+$target_psnrs = 10, 20, 30, 40, 50, 60, 70, 80
+foreach ($pt in $pt_combinations) {
+    foreach ($q in $astc_qualities) {
+        foreach ($b in $astc_blocks) {
+            foreach ($psnr in $target_psnrs) {
+                $p = $pt.P
+                $t = $pt.T
+                
+                $out_folder = "astc_output_Q$($q)_B$($b)_P$($p)_T$($t)_PSNR$($psnr)"
+                Write-Host "Running ASTC | Quality: $q | Block: $b | Process: $p | Thread: $t | Target PSNR: $psnr" -ForegroundColor DarkGray
+                python tool.py --codec astc --astc_mode cl --astc_quality $q --astc_block_size $b --target_psnr $psnr --nProcesses $p --nThreads $t --data_path dataset --output_path $out_folder
+                if (Test-Path $out_folder) 
+                {
+                    Remove-Item -Path $out_folder -Recurse -Force
+                }
             }
         }
     }

@@ -4,3 +4,6 @@
 [submodule "vender/astc-encoder"]
 	path = vender/astc-encoder
 	url = https://github.com/ARM-software/astc-encoder.git
+[submodule "vender/astc-encoder-psnr"]
+	path = vender/astc-encoder-psnr
+	url = https://github.com/nahjaeho/astc-encoder.git

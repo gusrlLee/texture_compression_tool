@@ -11,12 +11,13 @@ from PIL import Image
 
 etcpak_exefile_path = os.path.join(os.getcwd(), "encoders", "etcpak", "etcpak.exe")
 astc_exefile_path = os.path.join(os.getcwd(), "encoders", "astcenc", "astcenc-avx2.exe")
+astc_psnr_exefile_path = os.path.join(os.getcwd(), "encoders", "astcenc-psnr", "astcenc-avx2.exe")
 
 """
 추가 사항 
-1. astc target psnr SW impact paper adding -> 실험 필요
-2. cH argu 가능하게 추가 대신 실험은 X
-3. astc fastest, medium, thorough, quality 만 체크
+1. astc target psnr SW impact paper adding -> 실험 필요 (완료)
+2. cH argu 가능하게 추가 대신 실험은 X (완료)
+3. astc fastest, medium, thorough, quality 만 체크 (완료)
 """
 
 def parse_arguments():
@@ -45,16 +46,19 @@ def parse_arguments():
 
     # 4. ASTC Specific Options 
     astc_group = parser.add_argument_group("ASTC Specific Options")
-    # astc_group.add_argument("--astc_mode", type=str, choices=["l", "s", "h", "H"], default=argparse.SUPPRESS,
-    #                         help="Mode: l(linear LDR), s(sRGB LDR), h(HDR RGB/LDR A), H(HDR)")
+    astc_group.add_argument("--astc_mode", type=str, choices=["cl", "cs", "ch", "cH"], default="cl",
+                            help="Mode: l(linear LDR), s(sRGB LDR), h(HDR RGB/LDR A), H(HDR)")
     
     astc_group.add_argument("--astc_quality", type=str, default="medium",
                             help="Quality: fastest/fast/medium/thorough/verythorough/exhaustive")
     
     astc_blocks = ["4x4", "5x4", "5x5", "6x5", "6x6", "8x5", "8x6", 
                    "3x3x3", "4x3x3", "4x4x3", "4x4x4", "5x4x4"]
+    
     astc_group.add_argument("--astc_block_size", type=str, default="4x4", choices=astc_blocks, 
                             help="2D or 3D block size for ASTC")
+    
+    astc_group.add_argument("--target_psnr", type=int, default=40, help="target PSNR value as an artument to astcenc")
 
     args = parser.parse_args()
 
@@ -64,13 +68,9 @@ def parse_arguments():
 
     # Check if ASTC-specific options are explicitly used with a non-ASTC codec
     if args.codec != "astc":
-        # astc_mode is suppressed by default, so it only exists if explicitly provided
-        if hasattr(args, 'astc_mode'):
-            parser.error("The --astc_mode option is only valid for the 'astc' codec.")
-        
         # Check if the user explicitly provided --astc_quality or --astc_block_size via command line
-        if '--astc_quality' in sys.argv or '--astc_block_size' in sys.argv:
-            print("[Warning] ASTC-specific options (--astc_quality, --astc_block_size) will be ignored since the chosen codec is not 'astc'.")
+        if any(opt in sys.argv for opt in ['--astc_quality', '--astc_block_size', '--target_psnr']):
+            print(f"[Warning] ASTC-specific options (--astc_quality, --astc_block_size, --target_psnr) will be ignored since the chosen codec is not 'astc' (Current: {args.codec}).")
 
     return args
 
@@ -92,14 +92,25 @@ def works(args, images, image_index, lock):
         
         if args.codec == "astc":
             output_path = os.path.join(args.output_path, "astc", rel_dir, name + ".astc")
+
+            current_astc_encoder_exe_file = astc_exefile_path
+            is_psnr_active = 'target_psnr' in sys.argv
+
+            if is_psnr_active:
+                current_astc_encoder_exe_file = astc_psnr_exefile_path
+            
             command = [
-                astc_exefile_path, 
-                "-cl", input_path, 
+                current_astc_encoder_exe_file, 
+                f"-{args.astc_mode}", 
+                input_path, 
                 output_path, 
                 args.astc_block_size, 
                 f"-{args.astc_quality}",  
                 "-j", str(args.nThreads)
             ]
+
+            if is_psnr_active:
+                command.append("-dbtarget", str(args.target_psnr))
         else:
             # Checking alpha image
             codec = args.codec 
@@ -204,10 +215,10 @@ if __name__ == "__main__":
 
     program_end_time = time.perf_counter()
     if args.codec == "etc1":
-        print(f"{args.codec}, {args.astc_block_size}, {args.astc_quality} ,{args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
+        print(f"{args.codec}, {args.astc_mode}, {args.astc_block_size}, {args.astc_quality}, {args.target_psnr}, {args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
     elif args.codec == "etc2":
-        print(f"{args.codec}, {args.astc_block_size}, {args.astc_quality} ,{args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
+        print(f"{args.codec}, {args.astc_mode}, {args.astc_block_size}, {args.astc_quality}, {args.target_psnr}, {args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
     elif args.codec == "astc":
-        print(f"{args.codec}, {args.astc_block_size}, {args.astc_quality} ,{args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
+        print(f"{args.codec}, {args.astc_mode}, {args.astc_block_size}, {args.astc_quality}, {args.target_psnr}, {args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
     else: # bc
-        print(f"{args.codec}, {args.astc_block_size}, {args.astc_quality} ,{args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
+        print(f"{args.codec}, {args.astc_mode}, {args.astc_block_size}, {args.astc_quality}, {args.target_psnr}, {args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
