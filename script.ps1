@@ -2,6 +2,8 @@ $globalStartTime = Get-Date
 Write-Host "Start compression: $globalStartTime" -ForegroundColor Cyan
 Write-Host "--------------------------------------------------"
 
+$modes = @(0, 1, 2)
+
 $pt_combinations = @(
     @{P=1; T=24}, @{P=2; T=12}, @{P=3; T=8}, @{P=4; T=6},
     @{P=6; T=4},  @{P=8; T=3},  @{P=12; T=2}, @{P=24; T=1}
@@ -10,61 +12,66 @@ $pt_combinations = @(
 $bc_codecs = @("bc1", "bc3", "bc7")
 Write-Host "`n[TEST] BC formats starting..." -ForegroundColor Green
 
-foreach ($pt in $pt_combinations) {
-    foreach ($codec in $bc_codecs) {
-        $p = $pt.P
-        $t = $pt.T
-        $out_folder = "${codec}_output_P${p}_T${t}"
-        
-        Write-Host "Running $codec | Process: $p | Thread: $t" -ForegroundColor DarkGray
-        python tool.py --codec $codec --nProcesses $p --nThreads $t --data_path dataset --output_path $out_folder
-        if (Test-Path $out_folder) 
-        {
-            Remove-Item -Path $out_folder -Recurse -Force
-        }   
+foreach ($mode in $modes) {
+    foreach ($pt in $pt_combinations) {
+        foreach ($codec in $bc_codecs) {
+            $p = $pt.P
+            $t = $pt.T
+            $out_folder = "${codec}_output_M${mode}_P${p}_T${t}"
+            
+            Write-Host "Running $codec | Mode $mode | Process: $p | Thread: $t" -ForegroundColor DarkGray
+            python tool.py --mode $mode --codec $codec --nProcesses $p --nThreads $t --data_path dataset --output_path $out_folder
+            if (Test-Path $out_folder) 
+            {
+                Remove-Item -Path $out_folder -Recurse -Force
+            }   
+        }
     }
 }
 
 Write-Host "`n[TEST] ETC formats starting..." -ForegroundColor Green
-
-foreach ($pt in $pt_combinations) {
-    $p = $pt.P
-    $t = $pt.T
-    $out_folder = "etc1_output_P${p}_T${t}"
-    
-    Write-Host "Running etc1 | Process: $p | Thread: $t" -ForegroundColor DarkGray
-    python tool.py --codec etc1 --nProcesses $p --nThreads $t --data_path dataset --output_path $out_folder
-    if (Test-Path $out_folder) 
-    {
-        Remove-Item -Path $out_folder -Recurse -Force
-    }
-}
-
-$etc2_codecs = @("etc2")
-foreach ($pt in $pt_combinations) {
-    foreach ($codec in $etc2_codecs) {
+foreach ($mode in $modes) {
+    foreach ($pt in $pt_combinations) {
         $p = $pt.P
         $t = $pt.T
-        $out_folder = "${codec}_output_P${p}_T${t}"
+        $out_folder = "etc1_output_M${mode}_P${p}_T${t}"
         
-        Write-Host "Running $codec (Standard) | Process: $p | Thread: $t" -ForegroundColor DarkGray
-        python tool.py --codec $codec --nProcesses $p --nThreads $t --data_path dataset --output_path $out_folder
+        Write-Host "Running etc1 | Mode $mode | Process: $p | Thread: $t" -ForegroundColor DarkGray
+        python tool.py --mode $mode --codec etc1 --nProcesses $p --nThreads $t --data_path dataset --output_path $out_folder
         if (Test-Path $out_folder) 
         {
             Remove-Item -Path $out_folder -Recurse -Force
         }
     }
-    
-    foreach ($codec in $etc2_codecs) {
-        $p = $pt.P
-        $t = $pt.T
-        $out_folder = "${codec}_hq_output_P${p}_T${t}" # hq 폴더명 분리
+}
+
+$etc2_codecs = @("etc2")
+foreach ($mode in $modes) {
+    foreach ($pt in $pt_combinations) {
+        foreach ($codec in $etc2_codecs) {
+            $p = $pt.P
+            $t = $pt.T
+            $out_folder = "${codec}_output_M${mode}_P${p}_T${t}"
+            
+            Write-Host "Running $codec (Standard) | Mode $mode | Process: $p | Thread: $t" -ForegroundColor DarkGray
+            python tool.py --mode $mode --codec $codec --nProcesses $p --nThreads $t --data_path dataset --output_path $out_folder
+            if (Test-Path $out_folder) 
+            {
+                Remove-Item -Path $out_folder -Recurse -Force
+            }
+        }
         
-        Write-Host "Running $codec (HQ) | Process: $p | Thread: $t" -ForegroundColor Yellow
-        python tool.py --codec $codec --etc2_hq --nProcesses $p --nThreads $t --data_path dataset --output_path $out_folder
-        if (Test-Path $out_folder) 
-        {
-            Remove-Item -Path $out_folder -Recurse -Force
+        foreach ($codec in $etc2_codecs) {
+            $p = $pt.P
+            $t = $pt.T
+            $out_folder = "${codec}_hq_output_M${mode}_P${p}_T${t}" # hq 폴더명 분리
+            
+            Write-Host "Running $codec (HQ) | Mode $mode | Process: $p | Thread: $t" -ForegroundColor Yellow
+            python tool.py --mode $mode --codec $codec --etc2_hq --nProcesses $p --nThreads $t --data_path dataset --output_path $out_folder
+            if (Test-Path $out_folder) 
+            {
+                Remove-Item -Path $out_folder -Recurse -Force
+            }
         }
     }
 }
@@ -77,36 +84,17 @@ $astc_blocks = @("4x4", "6x6")
 # $astc_qualities = @("fastest", "fast", "medium")
 # $astc_blocks = @("4x4", "5x4", "5x5", "6x5", "6x6", "8x5", "8x6", "3x3x3", "4x3x3", "4x4x3", "4x4x4", "5x4x4")
 
-
-foreach ($pt in $pt_combinations) {
-    foreach ($q in $astc_qualities) {
-        foreach ($b in $astc_blocks) {
-            $p = $pt.P
-            $t = $pt.T
-            $out_folder = "astc_output_Q$($q)_B$($b)_P$($p)_T$($t)"
-            
-            Write-Host "Running ASTC | Quality: $q | Block: $b | Process: $p | Thread: $t" -ForegroundColor DarkGray
-            python tool.py --astc_mode cl --codec astc --astc_quality $q --astc_block_size $b --nProcesses $p --nThreads $t --data_path dataset --output_path $out_folder
-
-            if (Test-Path $out_folder) 
-            {
-                Remove-Item -Path $out_folder -Recurse -Force
-            }
-        }
-    }
-}
-
-$target_psnrs = 10, 20, 30, 40, 50, 60, 70, 80
-foreach ($pt in $pt_combinations) {
-    foreach ($q in $astc_qualities) {
-        foreach ($b in $astc_blocks) {
-            foreach ($psnr in $target_psnrs) {
+foreach ($mode in $modes) {
+    foreach ($pt in $pt_combinations) {
+        foreach ($q in $astc_qualities) {
+            foreach ($b in $astc_blocks) {
                 $p = $pt.P
                 $t = $pt.T
+                $out_folder = "astc_output_M$($mode)_Q$($q)_B$($b)_P$($p)_T$($t)"
                 
-                $out_folder = "astc_output_Q$($q)_B$($b)_P$($p)_T$($t)_PSNR$($psnr)"
-                Write-Host "Running ASTC | Quality: $q | Block: $b | Process: $p | Thread: $t | Target PSNR: $psnr" -ForegroundColor DarkGray
-                python tool.py --codec astc --astc_mode cl --astc_quality $q --astc_block_size $b --target_psnr $psnr --nProcesses $p --nThreads $t --data_path dataset --output_path $out_folder
+                Write-Host "Running ASTC | Mode $mode | Quality: $q | Block: $b | Process: $p | Thread: $t" -ForegroundColor DarkGray
+                python tool.py --mode $mode --astc_mode cl --codec astc --astc_quality $q --astc_block_size $b --nProcesses $p --nThreads $t --data_path dataset --output_path $out_folder
+
                 if (Test-Path $out_folder) 
                 {
                     Remove-Item -Path $out_folder -Recurse -Force
@@ -115,6 +103,26 @@ foreach ($pt in $pt_combinations) {
         }
     }
 }
+
+# $target_psnrs = 10, 20, 30, 40, 50, 60, 70, 80
+# foreach ($pt in $pt_combinations) {
+#     foreach ($q in $astc_qualities) {
+#         foreach ($b in $astc_blocks) {
+#             foreach ($psnr in $target_psnrs) {
+#                 $p = $pt.P
+#                 $t = $pt.T
+                
+#                 $out_folder = "astc_output_Q$($q)_B$($b)_P$($p)_T$($t)_PSNR$($psnr)"
+#                 Write-Host "Running ASTC | Quality: $q | Block: $b | Process: $p | Thread: $t | Target PSNR: $psnr" -ForegroundColor DarkGray
+#                 python tool.py --codec astc --astc_mode cl --astc_quality $q --astc_block_size $b --target_psnr $psnr --nProcesses $p --nThreads $t --data_path dataset --output_path $out_folder
+#                 if (Test-Path $out_folder) 
+#                 {
+#                     Remove-Item -Path $out_folder -Recurse -Force
+#                 }
+#             }
+#         }
+#     }
+# }
 
 $globalEndTime = Get-Date
 $elapsedTime = $globalEndTime - $globalStartTime

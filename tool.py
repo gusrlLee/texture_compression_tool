@@ -2,6 +2,8 @@ import sys
 import os 
 import argparse
 import time 
+import random
+random.seed(42)
 
 import subprocess
 import multiprocessing as mp
@@ -13,13 +15,6 @@ etcpak_exefile_path = os.path.join(os.getcwd(), "encoders", "etcpak", "etcpak.ex
 astc_exefile_path = os.path.join(os.getcwd(), "encoders", "astcenc", "astcenc-avx2.exe")
 astc_psnr_exefile_path = os.path.join(os.getcwd(), "encoders", "astcenc-psnr", "astcenc-avx2.exe")
 
-"""
-추가 사항 
-1. astc target psnr SW impact paper adding -> 실험 필요 (완료)
-2. cH argu 가능하게 추가 대신 실험은 X (완료)
-3. astc fastest, medium, thorough, quality 만 체크 (완료)
-"""
-
 def parse_arguments():
     parser = argparse.ArgumentParser(
         description="Texture Compression Batch Tool: Wrapper for Texture Compression",
@@ -28,6 +23,7 @@ def parse_arguments():
 
     # 1. Common option group 
     common_group = parser.add_argument_group("Common Options")
+    common_group.add_argument("-m", "--mode", type=int, default=2, help="Sorting mode")
     common_group.add_argument("-d", "--data_path", type=str, required=True, help="Input data image path")
     common_group.add_argument("-o", "--output_path", type=str, required=True, help="Compressed output save path")
     common_group.add_argument("-c", "--codec", type=str, required=True,
@@ -177,7 +173,12 @@ if __name__ == "__main__":
     # ---------------------------------------------------------
     # WORK FLOW 3: Image Sorting by File Size
     # ---------------------------------------------------------
-    image_paths.sort(key=lambda x: os.path.getsize(x), reverse=True)
+    if args.mode == 0:
+        random.shuffle(image_paths)
+    elif args.mode == 1:
+        image_paths.sort(key=lambda x: os.path.getsize(x), reverse=False)
+    else:
+        image_paths.sort(key=lambda x: os.path.getsize(x), reverse=True)
 
     # ---------------------------------------------------------
     # DEBUG: Print Configuration
@@ -215,10 +216,10 @@ if __name__ == "__main__":
 
     program_end_time = time.perf_counter()
     if args.codec == "etc1":
-        print(f"{args.codec}, {args.astc_mode}, {args.astc_block_size}, {args.astc_quality}, {args.target_psnr}, {args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
+        print(f"{args.mode}, {args.codec}, {args.astc_mode}, {args.astc_block_size}, {args.astc_quality}, {args.target_psnr}, {args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
     elif args.codec == "etc2":
-        print(f"{args.codec}, {args.astc_mode}, {args.astc_block_size}, {args.astc_quality}, {args.target_psnr}, {args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
+        print(f"{args.mode}, {args.codec}, {args.astc_mode}, {args.astc_block_size}, {args.astc_quality}, {args.target_psnr}, {args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
     elif args.codec == "astc":
-        print(f"{args.codec}, {args.astc_mode}, {args.astc_block_size}, {args.astc_quality}, {args.target_psnr}, {args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
+        print(f"{args.mode}, {args.codec}, {args.astc_mode}, {args.astc_block_size}, {args.astc_quality}, {args.target_psnr}, {args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
     else: # bc
-        print(f"{args.codec}, {args.astc_mode}, {args.astc_block_size}, {args.astc_quality}, {args.target_psnr}, {args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
+        print(f"{args.mode}, {args.codec}, {args.astc_mode}, {args.astc_block_size}, {args.astc_quality}, {args.target_psnr}, {args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
