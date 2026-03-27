@@ -27,7 +27,7 @@ def parse_arguments():
     common_group.add_argument("-d", "--data_path", type=str, required=True, help="Input data image path")
     common_group.add_argument("-o", "--output_path", type=str, required=True, help="Compressed output save path")
     common_group.add_argument("-c", "--codec", type=str, required=True,
-                              choices=["astc", "bc1", "bc3", "bc4", "bc5", "bc7", "etc1", "etc2"],
+                              choices=["astc", "bc1_bc3", "bc4", "bc5", "bc7", "etc1", "etc2"],
                               help="Select codec format")
 
     # 2. Performance & Concurrency Options 
@@ -117,7 +117,15 @@ def works(args, images, image_index, lock):
                     else:
                         codec = "etc2_rgb"
 
+            if args.codec == "bc1_bc3":
+                with Image.open(input_path) as img:
+                    if len(img.getbands()) == 4:
+                        codec = "bc3"
+                    else:
+                        codec = "bc1"
+
             output_path = os.path.join(args.output_path, "ktx", rel_dir, name + ".ktx")
+
             command = [
                 etcpak_exefile_path, 
                 "-M", 
