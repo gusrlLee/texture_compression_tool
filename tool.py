@@ -179,6 +179,7 @@ def prepare_commands(args, image_infos):
                     has_alpha = (info.channel == 4)
                     encoding_codec = "etc2_rgba" if has_alpha else "etc2_rgb"
 
+            output_path = os.path.join(args.output_path, "ktx", rel_dir, f"{name}.ktx")
             command = [
                 encoder,
                 "-M",
@@ -200,6 +201,7 @@ def prepare_commands(args, image_infos):
             is_psnr_active = 'target_psnr' in sys.argv
             encoder_exe = ASTCENC_PSNR_EXE_FILE if is_psnr_active else ASTCENC_EXE_FILE
 
+            output_path = os.path.join(args.output_path, "astc", rel_dir, f"{name}.astc")
             command = [
                 encoder_exe,
                 f"-{args.astc_mode}",
