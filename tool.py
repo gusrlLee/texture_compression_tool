@@ -81,7 +81,7 @@ def parse_arguments():
     # Validation Logic: Prevent conflicting arguments
     # ---------------------------------------------------------
     args = parser.parse_args()
-    is_astc_opt_used = any(opt in sys.argv for opt in ['--astc_quality', '--astc_block_size', '--target_psnr'])
+    is_astc_opt_missing = not all(opt in sys.argv for opt in ['--astc_quality', '--astc_block_size'])
 
     if args.codec in ["bc1_bc3", "bc4", "bc5", "bc7"]:
         if args.etc2_hq:
@@ -96,13 +96,13 @@ def parse_arguments():
             print(f"[INFO] 1-channel or 2-channel encoding selected (Current codec: {args.codec}).")
 
     # General Cross-Checks
-    if args.codec != "astc" and is_astc_opt_used:
+    if args.codec != "astc" and is_astc_opt_missing:
         print(f"[WARNING] ASTC-specific options will be ignored because the chosen codec is '{args.codec}'.")
 
     if args.codec == "astc":
         if args.etc2_hq:
             parser.error(f"[ERROR] The --etc2_hq option cannot be used with BC codecs (Current: {args.codec}).")
-        if is_astc_opt_used:
+        if is_astc_opt_missing:
             print("[SYSTEM] Recommending ASTC specific configuration.")
         
     return args
