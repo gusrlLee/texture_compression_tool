@@ -19,20 +19,35 @@ $pt_combinations = @(
 $bc_codecs = @("bc1_bc3", "bc7")
 Write-Host "`n[TEST] BC formats starting..." -ForegroundColor Green
 
+# foreach ($mode in $modes) {
+#     foreach ($pt in $pt_combinations) {
+#         foreach ($codec in $bc_codecs) {
+#             $p = $pt.P
+#             $t = $pt.T
+#             $out_folder = "${codec}_output_M${mode}_P${p}_T${t}"
+            
+#             Write-Host "Running $codec | Mode $mode | Process: $p | Thread: $t" -ForegroundColor DarkGray
+#             python tool.py --mode $mode --codec $codec --nProcesses $p --nThreads $t --data_path dataset --output_path $out_folder
+#             if (Test-Path $out_folder) 
+#             {
+#                 Remove-Item -Path $out_folder -Recurse -Force
+#             }   
+#         }
+#     }
+# }
+
 foreach ($mode in $modes) {
     foreach ($pt in $pt_combinations) {
-        foreach ($codec in $bc_codecs) {
-            $p = $pt.P
-            $t = $pt.T
-            $out_folder = "${codec}_output_M${mode}_P${p}_T${t}"
-            
-            Write-Host "Running $codec | Mode $mode | Process: $p | Thread: $t" -ForegroundColor DarkGray
-            python tool.py --mode $mode --codec $codec --nProcesses $p --nThreads $t --data_path dataset --output_path $out_folder
-            if (Test-Path $out_folder) 
-            {
-                Remove-Item -Path $out_folder -Recurse -Force
-            }   
-        }
+        $p = $pt.P
+        $t = $pt.T
+        $out_folder = "${codec}_output_M${mode}_P${p}_T${t}"
+        
+        Write-Host "Running $codec | Mode $mode | Process: $p | Thread: $t" -ForegroundColor DarkGray
+        python tool.py --mode $mode --codec bc7 --nProcesses $p --nThreads $t --data_path dataset --output_path $out_folder
+        if (Test-Path $out_folder) 
+        {
+            Remove-Item -Path $out_folder -Recurse -Force
+        }   
     }
 }
 

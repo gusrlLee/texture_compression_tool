@@ -54,14 +54,18 @@ def parse_arguments():
     # 2. Performance & Concurrency Options
     perf_group = parser.add_argument_group("Performance & Concurrency Options")
     perf_group.add_argument("-nP", "--nProcesses", type=int, default=1, help="Number of processes.")
-    perf_group.add_argument("-nT", "--nThreads", type=int, default=1, help="Number of threads per process (passed to the encoder).")
+    perf_group.add_argument("-nT", "--nThreads", type=int, default=12, help="Number of threads per process (passed to the encoder).")
 
-    # 3. ETC2 Specific Options 
+    # 3. BC7 Specific Option
+    bc7_group = parser.add_argument_group("BC7 Specific Option")
+    bc7_group.add_argument("--disable_heuristics", action="store_true", help="For QuickBC7 option")
+
+    # 4. ETC2 Specific Options 
     etc2_group = parser.add_argument_group("ETC2 Specific Options")
     etc2_group.add_argument("--etc2_hq", action="store_true", 
                             help="Enable High Quality mode for ETC2 (Valid only for etc2_rgb / etc2_rgba).")
 
-    # 4. ASTC Specific Options
+    # 5. ASTC Specific Options
     astc_group = parser.add_argument_group("ASTC Specific Options")
     astc_group.add_argument("--astc_mode", type=str, choices=["cl", "cs", "ch", "cH"], default="cl",
                             help="Color space mode: l(linear LDR), s(sRGB LDR), h(HDR RGB/LDR A), H(HDR).")
@@ -81,7 +85,7 @@ def parse_arguments():
     # Validation Logic: Prevent conflicting arguments
     # ---------------------------------------------------------
     args = parser.parse_args()
-    is_astc_opt_missing = not all(opt in sys.argv for opt in ['--astc_quality', '--astc_block_size'])
+    is_astc_opt_missing = any(opt in sys.argv for opt in ['--astc_quality', '--astc_block_size'])
 
     if args.codec in ["bc1_bc3", "bc4", "bc5", "bc7"]:
         if args.etc2_hq:
@@ -161,6 +165,9 @@ def prepare_commands(args, image_infos):
                 input_path,
                 output_path
             ]
+
+            if encoding_codec == "bc7" and args.disable_heuristics:
+                command.append("--disable-heuristics")
             commands.append(command)
 
         # ---------------------------------------------------------
@@ -327,10 +334,10 @@ if __name__ == "__main__":
 
     # for expriment
     if args.codec == "etc1":
-        print(f"{args.mode}, {args.codec}, {args.astc_mode}, {args.astc_block_size}, {args.astc_quality}, {args.target_psnr}, {args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
+        print(f"{args.mode}, {args.codec}, {args.disable_heuristics}, {args.astc_mode}, {args.astc_block_size}, {args.astc_quality}, {args.target_psnr}, {args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
     elif args.codec == "etc2":
-        print(f"{args.mode}, {args.codec}, {args.astc_mode}, {args.astc_block_size}, {args.astc_quality}, {args.target_psnr}, {args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
+        print(f"{args.mode}, {args.codec}, {args.disable_heuristics}, {args.astc_mode}, {args.astc_block_size}, {args.astc_quality}, {args.target_psnr}, {args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
     elif args.codec == "astc":
-        print(f"{args.mode}, {args.codec}, {args.astc_mode}, {args.astc_block_size}, {args.astc_quality}, {args.target_psnr}, {args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
+        print(f"{args.mode}, {args.codec}, {args.disable_heuristics}, {args.astc_mode}, {args.astc_block_size}, {args.astc_quality}, {args.target_psnr}, {args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
     else: # bc
-        print(f"{args.mode}, {args.codec}, {args.astc_mode}, {args.astc_block_size}, {args.astc_quality}, {args.target_psnr}, {args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
+        print(f"{args.mode}, {args.codec}, {args.disable_heuristics}, {args.astc_mode}, {args.astc_block_size}, {args.astc_quality}, {args.target_psnr}, {args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
