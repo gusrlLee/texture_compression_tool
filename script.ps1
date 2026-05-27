@@ -2,6 +2,18 @@ $globalStartTime = Get-Date
 Write-Host "Start compression: $globalStartTime" -ForegroundColor Cyan
 Write-Host "--------------------------------------------------"
 
+# python script for experiment 
+# # for expriment
+# if args.codec == "etc1":
+#     print(f"{args.mode}, {args.codec}, {args.disable_heuristics}, {args.astc_mode}, {args.astc_block_size}, {args.astc_quality}, {args.target_psnr}, {args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
+# elif args.codec == "etc2":
+#     print(f"{args.mode}, {args.codec}, {args.disable_heuristics}, {args.astc_mode}, {args.astc_block_size}, {args.astc_quality}, {args.target_psnr}, {args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
+# elif args.codec == "astc":
+#     print(f"{args.mode}, {args.codec}, {args.disable_heuristics}, {args.astc_mode}, {args.astc_block_size}, {args.astc_quality}, {args.target_psnr}, {args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
+# else: # bc
+#     print(f"{args.mode}, {args.codec}, {args.disable_heuristics}, {args.astc_mode}, {args.astc_block_size}, {args.astc_quality}, {args.target_psnr}, {args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
+
+
 $modes = @(0, 1, 2)
 
 # For Intel 285K CPU
@@ -19,22 +31,22 @@ $pt_combinations = @(
 $bc_codecs = @("bc1_bc3", "bc7")
 Write-Host "`n[TEST] BC formats starting..." -ForegroundColor Green
 
-# foreach ($mode in $modes) {
-#     foreach ($pt in $pt_combinations) {
-#         foreach ($codec in $bc_codecs) {
-#             $p = $pt.P
-#             $t = $pt.T
-#             $out_folder = "${codec}_output_M${mode}_P${p}_T${t}"
+foreach ($mode in $modes) {
+    foreach ($pt in $pt_combinations) {
+        foreach ($codec in $bc_codecs) {
+            $p = $pt.P
+            $t = $pt.T
+            $out_folder = "${codec}_output_M${mode}_P${p}_T${t}"
             
-#             Write-Host "Running $codec | Mode $mode | Process: $p | Thread: $t" -ForegroundColor DarkGray
-#             python tool.py --mode $mode --codec $codec --nProcesses $p --nThreads $t --data_path dataset --output_path $out_folder
-#             if (Test-Path $out_folder) 
-#             {
-#                 Remove-Item -Path $out_folder -Recurse -Force
-#             }   
-#         }
-#     }
-# }
+            Write-Host "Running $codec | Mode $mode | Process: $p | Thread: $t" -ForegroundColor DarkGray
+            python tool.py --mode $mode --codec $codec --nProcesses $p --nThreads $t --data_path dataset --output_path $out_folder
+            if (Test-Path $out_folder) 
+            {
+                Remove-Item -Path $out_folder -Recurse -Force
+            }   
+        }
+    }
+}
 
 foreach ($mode in $modes) {
     foreach ($pt in $pt_combinations) {
