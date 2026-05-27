@@ -323,5 +323,5 @@ python tool.py
 ---
 
 ## License
-- etcpak 2.1: BSD 3-Clause
-- astc-encoder: Apache 2.0
+- [etcpak 2.1](https://github.com/wolfpld/etcpak): BSD 3-Clause
+- [astc-encoder](https://github.com/ARM-software/astc-encoder): Apache 2.0
