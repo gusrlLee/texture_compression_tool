@@ -332,12 +332,12 @@ if __name__ == "__main__":
 
     program_end_time = time.perf_counter()
 
-    # for expriment
-    if args.codec == "etc1":
-        print(f"{args.mode}, {args.codec}, {args.disable_heuristics}, {args.astc_mode}, {args.astc_block_size}, {args.astc_quality}, {args.target_psnr}, {args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
-    elif args.codec == "etc2":
-        print(f"{args.mode}, {args.codec}, {args.disable_heuristics}, {args.astc_mode}, {args.astc_block_size}, {args.astc_quality}, {args.target_psnr}, {args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
-    elif args.codec == "astc":
-        print(f"{args.mode}, {args.codec}, {args.disable_heuristics}, {args.astc_mode}, {args.astc_block_size}, {args.astc_quality}, {args.target_psnr}, {args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
-    else: # bc
-        print(f"{args.mode}, {args.codec}, {args.disable_heuristics}, {args.astc_mode}, {args.astc_block_size}, {args.astc_quality}, {args.target_psnr}, {args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
+    # # for expriment
+    # if args.codec == "etc1":
+    #     print(f"{args.mode}, {args.codec}, {args.disable_heuristics}, {args.astc_mode}, {args.astc_block_size}, {args.astc_quality}, {args.target_psnr}, {args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
+    # elif args.codec == "etc2":
+    #     print(f"{args.mode}, {args.codec}, {args.disable_heuristics}, {args.astc_mode}, {args.astc_block_size}, {args.astc_quality}, {args.target_psnr}, {args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
+    # elif args.codec == "astc":
+    #     print(f"{args.mode}, {args.codec}, {args.disable_heuristics}, {args.astc_mode}, {args.astc_block_size}, {args.astc_quality}, {args.target_psnr}, {args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
+    # else: # bc
+    #     print(f"{args.mode}, {args.codec}, {args.disable_heuristics}, {args.astc_mode}, {args.astc_block_size}, {args.astc_quality}, {args.target_psnr}, {args.etc2_hq}, {args.nProcesses}, {args.nThreads}, {(program_end_time - program_start_time) * 1000:.4f}")
