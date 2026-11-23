@@ -79,7 +79,7 @@ def parse_arguments():
     astc_group.add_argument("--astc_block_size", type=str, default="4x4", choices=astc_blocks, 
                             help="2D or 3D block size for ASTC.")
     
-    astc_group.add_argument("--target_psnr", type=int, default=40, help="Target PSNR value (triggers astcenc-psnr executable).")
+    astc_group.add_argument("--target_psnr", type=int, default=None, help="Target PSNR value (triggers astcenc-psnr executable). Disabled if not specified.")
 
     # ---------------------------------------------------------
     # Validation Logic: Prevent conflicting arguments
@@ -205,7 +205,7 @@ def prepare_commands(args, image_infos):
         # ASTC Codec
         # ---------------------------------------------------------
         if args.codec == "astc":
-            is_psnr_active = 'target_psnr' in sys.argv
+            is_psnr_active = args.target_psnr is not None
             encoder_exe = ASTCENC_PSNR_EXE_FILE if is_psnr_active else ASTCENC_EXE_FILE
 
             output_path = os.path.join(args.output_path, "astc", rel_dir, f"{name}.astc")
@@ -220,7 +220,7 @@ def prepare_commands(args, image_infos):
             ]
 
             if is_psnr_active:
-                command.append("-dbtarget", str(args.target_psnr))
+                command.extend(["-dbtarget", str(args.target_psnr)])
 
             commands.append(command)
 

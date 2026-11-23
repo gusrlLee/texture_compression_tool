@@ -192,7 +192,7 @@ The tool will:
 | `--astc_mode` | `str` | `cl` | ASTC color mode (`cl`, `cs`, `ch`, `cH`) |
 | `--astc_quality` | `str` | `medium` | Compression quality preset |
 | `--astc_block_size` | `str` | `4x4` | ASTC block size |
-| `--target_psnr` | `int` | `40` | Target PSNR value |
+| `--target_psnr` | `int` | `None` | Target PSNR value (disabled if not specified) |
 
 ---
 
