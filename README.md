@@ -60,6 +60,14 @@ cd texture_compression_tool
 
 ## 2. Build Encoder Dependencies
 
+etcpak requires libpng (tested with libpng 1.6.43). If libpng is not installed, install it with vcpkg:
+
+```powershell
+vcpkg install libpng
+```
+
+Then build the encoders:
+
 ```powershell
 ./install_window.bat
 ```
